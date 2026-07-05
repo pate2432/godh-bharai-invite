@@ -68,7 +68,7 @@ export async function GET(request: Request) {
       {
         error: "not_configured",
         message:
-          "Google Sheets is not configured — add env vars on Vercel and redeploy.",
+          "Google Sheets is not configured — add env vars on Netlify and redeploy.",
       },
       { status: 501 },
     );

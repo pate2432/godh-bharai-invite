@@ -16,11 +16,15 @@ export default function Preloader() {
 
   useEffect(() => {
     if (reduced) {
+      unlockAudio();
       setPhase("done");
       return;
     }
     const doorsTimer = window.setTimeout(() => setPhase("doors"), 1600);
-    const doneTimer = window.setTimeout(() => setPhase("done"), 2500);
+    const doneTimer = window.setTimeout(() => {
+      unlockAudio();
+      setPhase("done");
+    }, 2500);
     return () => {
       window.clearTimeout(doorsTimer);
       window.clearTimeout(doneTimer);

@@ -4,6 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { config } from "@/config";
 import { setAudioUnlock } from "@/lib/unlockAudio";
 
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 /** Speaker with slash — music is muted */
 function SpeakerOff() {
   return (
@@ -24,14 +32,14 @@ function SpeakerOff() {
 }
 
 /**
- * Background music: autoplays on open, mute/unmute via the floating button.
- * iOS needs a tap first — the preloader "Tap to enter" unlocks sound.
+ * Background music — plays with sound on open.
+ * iOS/Safari needs a tap first; the preloader "Tap to enter" unlocks it.
  */
 export default function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audible, setAudible] = useState(false);
   const [showButton, setShowButton] = useState(true);
-  const startedRef = useRef(false);
+  const unlockedRef = useRef(false);
 
   const syncState = useCallback(() => {
     const audio = audioRef.current;
@@ -39,61 +47,64 @@ export default function MusicToggle() {
     setAudible(!audio.paused && !audio.muted);
   }, []);
 
-  const playWithSound = useCallback(async () => {
+  const playAudible = useCallback(async (): Promise<boolean> => {
     const audio = audioRef.current;
     if (!audio) return false;
     audio.muted = false;
+    audio.volume = 1;
     try {
       await audio.play();
       syncState();
-      return true;
+      return !audio.muted && !audio.paused;
     } catch {
       return false;
     }
   }, [syncState]);
 
-  const playMuted = useCallback(async () => {
+  const unlock = useCallback(async () => {
+    if (unlockedRef.current) {
+      await playAudible();
+      return;
+    }
+    unlockedRef.current = true;
+
     const audio = audioRef.current;
-    if (!audio) return false;
+    if (!audio) return;
+
+    audio.muted = false;
+    audio.volume = 1;
+
+    if (await playAudible()) return;
+
+    // Last resort: start muted, then unmute in the same gesture stack (iOS)
     audio.muted = true;
     try {
       await audio.play();
+      audio.muted = false;
       syncState();
-      return true;
     } catch {
-      return false;
+      /* browser blocked playback */
     }
-  }, [syncState]);
+  }, [playAudible, syncState]);
 
-  const unmute = useCallback(async () => {
+  const startDesktopAutoplay = useCallback(async () => {
+    if (isIOS()) return;
+
+    if (await playAudible()) return;
+
+    // Brief muted start, then immediately unmute (Chrome sometimes needs this)
     const audio = audioRef.current;
     if (!audio) return;
-    audio.muted = false;
-    if (audio.paused) {
-      try {
-        await audio.play();
-      } catch {
-        return;
-      }
+    audio.muted = true;
+    try {
+      await audio.play();
+      audio.muted = false;
+      await audio.play();
+      syncState();
+    } catch {
+      /* will retry */
     }
-    syncState();
-  }, [syncState]);
-
-  const tryAutoplay = useCallback(async () => {
-    if (startedRef.current) return;
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    // With sound first (desktop / Android)
-    if (await playWithSound()) {
-      startedRef.current = true;
-      return;
-    }
-    // Muted fallback (iOS — unmuted on preloader tap)
-    if (await playMuted()) {
-      startedRef.current = true;
-    }
-  }, [playMuted, playWithSound]);
+  }, [playAudible, syncState]);
 
   useEffect(() => {
     if (!config.audioSrc) {
@@ -105,48 +116,50 @@ export default function MusicToggle() {
     if (!audio) return;
 
     const onError = () => setShowButton(false);
-    const onReady = () => void tryAutoplay();
+    const onReady = () => {
+      void startDesktopAutoplay();
+      if (isIOS()) setAudioUnlock(() => void unlock());
+    };
 
     audio.addEventListener("error", onError);
     audio.addEventListener("loadeddata", onReady);
     audio.addEventListener("canplaythrough", onReady);
     audio.load();
 
-    // Try immediately + retry (helps on refresh when file is cached)
-    void tryAutoplay();
+    void startDesktopAutoplay();
+    setAudioUnlock(() => void unlock());
+
     const retry = window.setInterval(() => {
-      if (startedRef.current) {
-        window.clearInterval(retry);
-        return;
-      }
-      void tryAutoplay();
-    }, 400);
-    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 4000);
+      if (unlockedRef.current || isIOS()) return;
+      void startDesktopAutoplay();
+    }, 500);
+    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 8000);
 
-    setAudioUnlock(() => void unmute());
-
-    const onFirstTap = () => void unmute();
-    document.addEventListener("pointerdown", onFirstTap, { once: true, passive: true });
+    const onInteract = () => void unlock();
+    document.addEventListener("pointerdown", onInteract, { once: true, passive: true });
+    document.addEventListener("keydown", onInteract, { once: true });
 
     return () => {
       audio.removeEventListener("error", onError);
       audio.removeEventListener("loadeddata", onReady);
       audio.removeEventListener("canplaythrough", onReady);
-      document.removeEventListener("pointerdown", onFirstTap);
+      document.removeEventListener("pointerdown", onInteract);
+      document.removeEventListener("keydown", onInteract);
       window.clearInterval(retry);
       window.clearTimeout(stopRetry);
       setAudioUnlock(() => {});
       audio.pause();
-      startedRef.current = false;
+      unlockedRef.current = false;
     };
-  }, [tryAutoplay, unmute]);
+  }, [startDesktopAutoplay, unlock]);
 
   const toggle = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (audio.muted || audio.paused) {
-      await unmute();
+      unlockedRef.current = true;
+      await unlock();
     } else {
       audio.muted = true;
       syncState();
@@ -163,6 +176,7 @@ export default function MusicToggle() {
         src={config.audioSrc}
         loop
         preload="auto"
+        autoPlay
         playsInline
         className="hidden"
         aria-hidden="true"

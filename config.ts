@@ -98,7 +98,7 @@ export const config: InviteConfig = {
 
   audioSrc: "/music.mp3",
 
-  siteUrl: "https://godh-bharai-invite.vercel.app",
+  siteUrl: "https://godh-bharai-invite.netlify.app",
 
   footerCredit: "awaiting our little Radha/Krishna",
 };

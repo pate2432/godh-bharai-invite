@@ -38,19 +38,24 @@ GOOGLE_SHEET_ID=the_id_from_the_sheet_URL
 HOST_PASSPHRASE=pick-a-secret-phrase
 ```
 
-## Deploy to Vercel
+## Deploy to Netlify
 
-1. Push this repo to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Add the four env vars above in **Project → Settings → Environment Variables**
-4. Update `siteUrl` in `config.ts` to your live Vercel URL
-5. Redeploy
+1. Push this repo to GitHub (already at [github.com/pate2432/godh-bharai-invite](https://github.com/pate2432/godh-bharai-invite))
+2. Go to [app.netlify.com/start](https://app.netlify.com/start) → **Import from Git** → choose the repo
+3. Netlify auto-detects Next.js — build command `npm run build`, plugin `@netlify/plugin-nextjs` (set in `netlify.toml`)
+4. Before deploying, add these **Environment variables** (Site settings → Environment variables):
+   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+   - `GOOGLE_PRIVATE_KEY` (paste with `\n` escapes intact)
+   - `GOOGLE_SHEET_ID`
+   - `HOST_PASSPHRASE`
+5. Deploy
+6. Update `siteUrl` in `config.ts` to your live Netlify URL (e.g. `https://your-site-name.netlify.app`), commit, and push to redeploy
 
 ### Pre-launch checklist
 
 - [ ] `config.ts` — names, date, venue, `siteUrl`
 - [ ] `public/music.mp3` — background track (under ~5 MB)
-- [ ] Vercel env vars set (all four)
+- [ ] Netlify env vars set (all four)
 - [ ] Test RSVP on deployed URL → row appears in sheet
 - [ ] Test `/host` dashboard with passphrase
 - [ ] Test on iPhone Safari (tap preloader → music unmute)
