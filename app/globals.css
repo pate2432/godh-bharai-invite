@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --yamuna-night: #0d1533; /* page ground — deep jewel indigo */
+  --pichwai-blue: #1e3a8a;
+  --radha-gold: #d4a017;
+  --gold-leaf: #f2c94c;
+  --lotus-pink: #f2a9cc;
+  --peacock-teal: #14b8a6;
+  --morpankh-emerald: #1b6b45;
+  --moonlight: #fdf6e3;
+  --sindoor: #e14434;
+  --dawn-cream: #fdf6e3;
+  --gold-deep: #a87c10;
+  --yamuna-day: #24418f; /* river blue, saturated against the dark ground */
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--yamuna-night);
+  /* colorful jewel washes — blue from above, teal from the left, rose at the base */
+  background-image:
+    radial-gradient(1100px 600px at 85% -120px, rgba(30, 58, 138, 0.55), transparent 65%),
+    radial-gradient(900px 700px at -10% 35%, rgba(20, 184, 166, 0.14), transparent 60%),
+    radial-gradient(1000px 500px at 50% 105%, rgba(242, 169, 204, 0.1), transparent 60%);
+  background-attachment: fixed;
+  color: var(--moonlight);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
+  /* iOS home-indicator / notch breathing room */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Fixed backgrounds hurt scroll perf on iOS Safari — use scroll attachment on phones */
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
+/* Prevent iOS zoom-on-focus: all form fields must be ≥ 16px */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* Comfortable tap targets on touch devices */
+@media (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-floating {
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+}
+
+.safe-top {
+  top: max(0.75rem, env(safe-area-inset-top, 0px));
+}
+
+/* Anchor scroll: keep RSVP section clear of the fixed top button */
+#rsvp {
+  scroll-margin-top: 4.5rem;
+}
+
+::selection {
+  background: var(--radha-gold);
+  color: var(--yamuna-night);
+}
+
+/* Gold focus rings, visible on the dark ground */
+*:focus-visible {
+  outline: 2px solid var(--gold-leaf);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Engraved-plaque eyebrow label */
+.eyebrow {
+  @apply font-body text-[0.65rem] sm:text-xs uppercase tracking-eyebrow font-medium;
+  color: var(--gold-leaf);
+}
+
+/* Shimmering gold display text */
+.gold-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--radha-gold) 20%,
+    #f9e39a 40%,
+    var(--gold-leaf) 50%,
+    #f9e39a 60%,
+    var(--radha-gold) 80%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% center;
+  }
+}
+
+/* Twinkling stars in the hero sky */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
+}
+
+.star {
+  position: absolute;
+  border-radius: 9999px;
+  background-color: var(--moonlight);
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-shimmer {
+    animation: none;
+    color: var(--gold-leaf);
+    background: none;
+  }
+
+  .star {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* Kinari — thin sari-border running down both desktop edges */
+.kinari {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  z-index: 40;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='56' viewBox='0 0 14 56'%3E%3Cline x1='2.5' y1='0' x2='2.5' y2='56' stroke='%23D4A017' stroke-width='1' opacity='0.75'/%3E%3Cline x1='11.5' y1='0' x2='11.5' y2='56' stroke='%23D4A017' stroke-width='0.6' opacity='0.45'/%3E%3Cpath d='M7 14 Q9.5 18 7 22 Q4.5 18 7 14 Z' fill='%23D4A017' opacity='0.8'/%3E%3Ccircle cx='7' cy='34' r='1.4' fill='%23F2C94C' opacity='0.7'/%3E%3Ccircle cx='7' cy='44' r='0.9' fill='%23E8A0BF' opacity='0.55'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-position: center top;
+}
+
+.kinari-left {
+  left: 6px;
+}
+
+.kinari-right {
+  right: 6px;
+  transform: scaleX(-1);
+}
+
+@media (max-width: 767px) {
+  .kinari {
+    display: none;
+  }
+}
+
+/* Ritual icons draw themselves in on scroll into view */
+.draw-path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.3s ease 0.15s;
+}
+
+.drawn .draw-path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw-path {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}
+
+/* Music toggle equalizer bars */
+@keyframes musicbar {
+  from {
+    height: 4px;
+  }
+  to {
+    height: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="musicbar"] {
+    animation: none !important;
+    height: 10px;
+  }
+}
+
+/* Number stepper: hide native spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
