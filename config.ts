@@ -55,6 +55,17 @@ export interface InviteConfig {
 
   /** Footer credit line at the very bottom */
   footerCredit: string;
+
+  /** Second-screen host photo + personal message */
+  hostNote: {
+    /** Photo in /public, e.g. "/host.jpg". Leave empty to hide the image. */
+    photoSrc: string;
+    photoAlt: string;
+    heading: string;
+    lines: string[];
+    signature: string;
+    devanagari: { text: string; translation: string };
+  };
 }
 
 export const config: InviteConfig = {
@@ -101,4 +112,21 @@ export const config: InviteConfig = {
   siteUrl: "https://godh-bharai-invite.netlify.app",
 
   footerCredit: "awaiting our little Radha/Krishna",
+
+  hostNote: {
+    photoSrc: "/host.jpg",
+    photoAlt: "Naitik and Krupa",
+    heading: "A note from us",
+    lines: [
+      "We are so thrilled to welcome you as we celebrate the upcoming arrival of our little Radha/Krishna.",
+      "Your love, laughter, and blessings mean the world to us on this beautiful journey.",
+      "We cannot wait to share this special day with you — surrounded by the people we cherish most.",
+      "Thank you for being part of our story.",
+    ],
+    signature: "With love, Naitik & Krupa",
+    devanagari: {
+      text: "प्रेम सहित",
+      translation: "With love",
+    },
+  },
 };

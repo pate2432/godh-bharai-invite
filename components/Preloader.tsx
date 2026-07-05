@@ -5,10 +5,14 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Flute from "@/components/art/Flute";
 import { unlockAudio } from "@/lib/unlockAudio";
 
+function prefersTouch(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+
 /**
- * Loading moment (max 2.5s, skippable): gold flute fades in, five
- * note-glyphs drift up like fireflies, then temple doors slide apart.
- * Under prefers-reduced-motion we skip straight to the hero.
+ * Loading moment: gold flute, temple doors, then enter.
+ * Phones require a tap to enter (and start music). Desktop auto-enters.
  */
 export default function Preloader() {
   const reduced = useReducedMotion();
@@ -20,19 +24,26 @@ export default function Preloader() {
       setPhase("done");
       return;
     }
+
     const doorsTimer = window.setTimeout(() => setPhase("doors"), 1600);
-    const doneTimer = window.setTimeout(() => {
-      unlockAudio();
-      setPhase("done");
-    }, 2500);
+
+    // Desktop only — phones must tap (browser needs gesture for sound)
+    let doneTimer: number | undefined;
+    if (!prefersTouch()) {
+      doneTimer = window.setTimeout(() => {
+        unlockAudio();
+        setPhase("done");
+      }, 2500);
+    }
+
     return () => {
       window.clearTimeout(doorsTimer);
-      window.clearTimeout(doneTimer);
+      if (doneTimer) window.clearTimeout(doneTimer);
     };
   }, [reduced]);
 
-  const skip = () => {
-    unlockAudio(); // preloader tap unlocks sound on iOS
+  const enter = () => {
+    unlockAudio();
     setPhase("done");
   };
 
@@ -41,15 +52,10 @@ export default function Preloader() {
       {phase !== "done" && (
         <motion.div
           className="fixed inset-0 z-[100] cursor-pointer touch-manipulation"
-          onClick={skip}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            skip();
-          }}
+          onPointerDown={enter}
           exit={{ opacity: 0, transition: { duration: 0.3 } }}
           aria-hidden="true"
         >
-          {/* Two temple-door panels */}
           {(["left", "right"] as const).map((side) => (
             <motion.div
               key={side}
@@ -69,7 +75,6 @@ export default function Preloader() {
             />
           ))}
 
-          {/* Flute + drifting notes, centered over the doors */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             animate={phase === "doors" ? { opacity: 0 } : { opacity: 1 }}

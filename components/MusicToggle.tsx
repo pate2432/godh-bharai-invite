@@ -4,12 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { config } from "@/config";
 import { setAudioUnlock } from "@/lib/unlockAudio";
 
-function isIOS(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
+function prefersTouch(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
 }
 
 /** Speaker with slash — music is muted */
@@ -32,79 +29,52 @@ function SpeakerOff() {
 }
 
 /**
- * Background music — plays with sound on open.
- * iOS/Safari needs a tap first; the preloader "Tap to enter" unlocks it.
+ * Background music — plays with sound on open (desktop) or on
+ * "Tap to enter" (phones). play() runs synchronously inside the tap handler.
  */
 export default function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audible, setAudible] = useState(false);
   const [showButton, setShowButton] = useState(true);
-  const unlockedRef = useRef(false);
 
   const syncState = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    setAudible(!audio.paused && !audio.muted);
+    setAudible(!audio.paused && !audio.muted && audio.volume > 0);
   }, []);
 
-  const playAudible = useCallback(async (): Promise<boolean> => {
+  /** Call inside a user-gesture handler — play() must start synchronously. */
+  const unlock = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio) return false;
+    if (!audio) return;
+
     audio.muted = false;
     audio.volume = 1;
-    try {
-      await audio.play();
+
+    const attempt = audio.play();
+    if (attempt) {
+      attempt
+        .then(() => syncState())
+        .catch(() => {
+          audio.muted = true;
+          audio
+            .play()
+            .then(() => {
+              audio.muted = false;
+              return audio.play();
+            })
+            .then(() => syncState())
+            .catch(() => syncState());
+        });
+    } else {
       syncState();
-      return !audio.muted && !audio.paused;
-    } catch {
-      return false;
     }
   }, [syncState]);
 
-  const unlock = useCallback(async () => {
-    if (unlockedRef.current) {
-      await playAudible();
-      return;
-    }
-    unlockedRef.current = true;
-
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.muted = false;
-    audio.volume = 1;
-
-    if (await playAudible()) return;
-
-    // Last resort: start muted, then unmute in the same gesture stack (iOS)
-    audio.muted = true;
-    try {
-      await audio.play();
-      audio.muted = false;
-      syncState();
-    } catch {
-      /* browser blocked playback */
-    }
-  }, [playAudible, syncState]);
-
-  const startDesktopAutoplay = useCallback(async () => {
-    if (isIOS()) return;
-
-    if (await playAudible()) return;
-
-    // Brief muted start, then immediately unmute (Chrome sometimes needs this)
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = true;
-    try {
-      await audio.play();
-      audio.muted = false;
-      await audio.play();
-      syncState();
-    } catch {
-      /* will retry */
-    }
-  }, [playAudible, syncState]);
+  const tryAutoplay = useCallback(() => {
+    if (prefersTouch()) return;
+    unlock();
+  }, [unlock]);
 
   useEffect(() => {
     if (!config.audioSrc) {
@@ -116,50 +86,41 @@ export default function MusicToggle() {
     if (!audio) return;
 
     const onError = () => setShowButton(false);
-    const onReady = () => {
-      void startDesktopAutoplay();
-      if (isIOS()) setAudioUnlock(() => void unlock());
-    };
+    const onReady = () => tryAutoplay();
 
     audio.addEventListener("error", onError);
-    audio.addEventListener("loadeddata", onReady);
-    audio.addEventListener("canplaythrough", onReady);
+    audio.addEventListener("canplay", onReady);
     audio.load();
 
-    void startDesktopAutoplay();
-    setAudioUnlock(() => void unlock());
+    setAudioUnlock(unlock);
+    tryAutoplay();
 
     const retry = window.setInterval(() => {
-      if (unlockedRef.current || isIOS()) return;
-      void startDesktopAutoplay();
-    }, 500);
-    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 8000);
-
-    const onInteract = () => void unlock();
-    document.addEventListener("pointerdown", onInteract, { once: true, passive: true });
-    document.addEventListener("keydown", onInteract, { once: true });
+      if (prefersTouch()) return;
+      if (!audio.paused && !audio.muted) {
+        window.clearInterval(retry);
+        return;
+      }
+      tryAutoplay();
+    }, 600);
+    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 10000);
 
     return () => {
       audio.removeEventListener("error", onError);
-      audio.removeEventListener("loadeddata", onReady);
-      audio.removeEventListener("canplaythrough", onReady);
-      document.removeEventListener("pointerdown", onInteract);
-      document.removeEventListener("keydown", onInteract);
+      audio.removeEventListener("canplay", onReady);
       window.clearInterval(retry);
       window.clearTimeout(stopRetry);
       setAudioUnlock(() => {});
       audio.pause();
-      unlockedRef.current = false;
     };
-  }, [startDesktopAutoplay, unlock]);
+  }, [tryAutoplay, unlock]);
 
-  const toggle = async () => {
+  const toggle = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (audio.muted || audio.paused) {
-      unlockedRef.current = true;
-      await unlock();
+      unlock();
     } else {
       audio.muted = true;
       syncState();
@@ -176,7 +137,6 @@ export default function MusicToggle() {
         src={config.audioSrc}
         loop
         preload="auto"
-        autoPlay
         playsInline
         className="hidden"
         aria-hidden="true"

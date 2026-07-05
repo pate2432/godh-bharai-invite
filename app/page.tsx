@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import Preloader from "@/components/Preloader";
 import Hero from "@/components/Hero";
+import HostNote from "@/components/HostNote";
 import Jhula from "@/components/Jhula";
 import Footer from "@/components/Footer";
 import Rsvp from "@/components/Rsvp";
@@ -19,6 +20,8 @@ export default function Home() {
       <RsvpNavButton />
       <MusicToggle />
       <Hero />
+      <LotusDivider />
+      <HostNote />
       <LotusDivider />
       <Jhula />
       <LotusDivider />
