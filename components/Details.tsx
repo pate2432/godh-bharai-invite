@@ -21,7 +21,7 @@ export default function Details() {
     <section id="details" className="px-4 py-8 sm:px-5" aria-label="Event details">
       <Reveal>
         <div className="mb-10 text-center">
-          <p lang="hi" className="font-deva text-2xl text-goldleaf">
+          <p lang="gu" className="font-guj text-2xl text-goldleaf">
             {config.devanagari.details.text}
           </p>
           <p className="eyebrow mt-2 !text-moonlight/50">

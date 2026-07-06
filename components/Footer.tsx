@@ -4,12 +4,11 @@ import LotusBud from "@/components/art/LotusBud";
 export default function Footer() {
   return (
     <footer className="safe-bottom px-4 pb-20 pt-10 text-center sm:px-6">
-      <p lang="hi" className="font-deva text-3xl text-goldleaf">
-        {config.devanagari.footer.text}
-      </p>
-      <p className="eyebrow mt-3 !text-moonlight/60">
-        {config.devanagari.footer.translation}
-      </p>
+      <div lang="gu" className="font-guj space-y-2 text-lg leading-relaxed text-goldleaf sm:text-xl">
+        {config.footerShloka.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
 
       <div aria-hidden="true" className="mt-8 flex items-center justify-center gap-2.5">
         {[0, 1, 2, 3, 4].map((i) => (

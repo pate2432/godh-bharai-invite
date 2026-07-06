@@ -329,8 +329,8 @@ export default function Hero() {
         className="relative z-10 mt-[10vh] flex flex-col items-center px-4 text-center sm:mt-[12vh] sm:px-6"
       >
         <motion.p
-          lang="hi"
-          className="gold-shimmer font-deva-display text-3xl sm:text-4xl md:text-5xl"
+          lang="gu"
+          className="gold-shimmer font-guj text-xl sm:text-2xl md:text-3xl"
           style={{ textShadow: "0 0 32px rgba(242,201,76,0.4)" }}
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

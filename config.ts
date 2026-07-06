@@ -29,13 +29,15 @@ export interface InviteConfig {
   /** Leave empty string to hide the registry/blessings note */
   registryNote: string;
 
-  /** Devanagari accent lines with translations (per section) */
+  /** Devanagari / Gujarati accent lines with translations (per section) */
   devanagari: {
     hero: { text: string; translation: string };
     details: { text: string; translation: string };
     rsvp: { text: string; translation: string };
-    footer: { text: string; translation: string };
   };
+
+  /** Gujarati shloka at the bottom of the page */
+  footerShloka: string[];
 
   /** Gujarati blessing beneath the jhula */
   jhulaMessage: {
@@ -91,20 +93,21 @@ export const config: InviteConfig = {
 
   dressCode: "Shades of blue & pink (only if possible and available)",
   registryNote:
-    "Your presence is the only gift we wish for — your blessings, the only registry.",
+    "We would be honoured by your presence and your blessings on this beautiful day.",
 
   devanagari: {
     hero: { text: "જય સ્વામિનારાયણ", translation: "Radhe Krishna" },
-    details: { text: "जय श्री कृष्ण", translation: "Jai Shri Krishna" },
+    details: { text: "જય સ્વામિનારાયણ", translation: "Jai Swaminarayan" },
     rsvp: {
       text: "आशीर्वाद दीजिये",
       translation: "Bestow your blessings",
     },
-    footer: {
-      text: "जय कन्हैया लाल की",
-      translation: "Victory to the beloved of Nanda",
-    },
   },
+
+  footerShloka: [
+    "ૐ દેવકીસુત ગોવિંદ, વાસુદેવ જગત્પતે।",
+    "દેહિ મે તનયં કૃષ્ણ, ત્વામહં શરણં ગતઃ॥",
+  ],
 
   heroTagline: "A little Radha/Krishna is on the way",
   rsvpSuccessTo: "Naitik & Krupa",
@@ -125,7 +128,7 @@ export const config: InviteConfig = {
   footerCredit: "awaiting our little Radha/Krishna",
 
   hostNote: {
-    photoSrc: "/host.jpg",
+    photoSrc: "/host.jpg?v=2",
     photoAlt: "Naitik and Krupa",
     heading: "A note from us",
     lines: [

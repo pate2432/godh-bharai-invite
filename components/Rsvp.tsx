@@ -63,17 +63,19 @@ function LotusRadio({
   value,
   current,
   label,
+  sublabel,
   onChange,
 }: {
   value: Attending;
   current: Attending;
   label: string;
+  sublabel?: string;
   onChange: (v: Attending) => void;
 }) {
   const selected = current === value;
   return (
     <label
-      className={`flex min-h-[88px] flex-1 cursor-pointer flex-col items-center justify-center gap-2 border px-3 py-4 text-center transition-colors sm:gap-3 sm:px-4 sm:py-5 ${
+      className={`flex min-h-[88px] flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 border px-3 py-4 text-center transition-colors sm:gap-2 sm:px-4 sm:py-5 ${
         selected
           ? "border-goldleaf bg-gold/15"
           : "border-gold/30 active:border-gold/70"
@@ -96,6 +98,13 @@ function LotusRadio({
       >
         {label}
       </span>
+      {sublabel && (
+        <span
+          className={`font-body text-xs uppercase tracking-label ${selected ? "text-goldleaf/80" : "text-moonlight/50"}`}
+        >
+          {sublabel}
+        </span>
+      )}
     </label>
   );
 }
@@ -237,12 +246,14 @@ export default function Rsvp() {
                         value="yes"
                         current={attending}
                         label="Joyfully coming"
+                        sublabel="Yes"
                         onChange={setAttending}
                       />
                       <LotusRadio
                         value="no"
                         current={attending}
                         label="Blessings from afar"
+                        sublabel="No"
                         onChange={setAttending}
                       />
                     </div>
