@@ -1,50 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Flute from "@/components/art/Flute";
 import { unlockAudio } from "@/lib/unlockAudio";
 
-function prefersTouch(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
-}
-
 /**
- * Loading moment: gold flute, temple doors, then enter.
- * Phones require a tap to enter (and start music). Desktop auto-enters.
+ * Temple-door entrance — stays until the guest taps.
+ * Doors open only after tap (phones and laptops).
  */
 export default function Preloader() {
   const reduced = useReducedMotion();
   const [phase, setPhase] = useState<"flute" | "doors" | "done">("flute");
+  const enteredRef = useRef(false);
 
   useEffect(() => {
     if (reduced) {
       unlockAudio();
       setPhase("done");
-      return;
     }
-
-    const doorsTimer = window.setTimeout(() => setPhase("doors"), 1600);
-
-    // Desktop only — phones must tap (browser needs gesture for sound)
-    let doneTimer: number | undefined;
-    if (!prefersTouch()) {
-      doneTimer = window.setTimeout(() => {
-        unlockAudio();
-        setPhase("done");
-      }, 2500);
-    }
-
-    return () => {
-      window.clearTimeout(doorsTimer);
-      if (doneTimer) window.clearTimeout(doneTimer);
-    };
   }, [reduced]);
 
   const enter = () => {
+    if (enteredRef.current || phase !== "flute") return;
+    enteredRef.current = true;
     unlockAudio();
-    setPhase("done");
+    setPhase("doors");
+    window.setTimeout(() => setPhase("done"), 950);
   };
 
   return (
@@ -53,8 +35,13 @@ export default function Preloader() {
         <motion.div
           className="fixed inset-0 z-[100] cursor-pointer touch-manipulation"
           onPointerDown={enter}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") enter();
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Tap to enter the invitation"
           exit={{ opacity: 0, transition: { duration: 0.3 } }}
-          aria-hidden="true"
         >
           {(["left", "right"] as const).map((side) => (
             <motion.div
@@ -103,9 +90,11 @@ export default function Preloader() {
             </div>
           </motion.div>
 
-          <span className="eyebrow absolute bottom-8 left-1/2 -translate-x-1/2 !text-goldleaf opacity-80">
-            Tap to enter
-          </span>
+          {phase === "flute" && (
+            <span className="eyebrow absolute bottom-8 left-1/2 -translate-x-1/2 !text-goldleaf opacity-80">
+              Tap to enter
+            </span>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

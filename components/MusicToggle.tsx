@@ -4,11 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { config } from "@/config";
 import { setAudioUnlock } from "@/lib/unlockAudio";
 
-function prefersTouch(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
-}
-
 /** Speaker with slash — music is muted */
 function SpeakerOff() {
   return (
@@ -29,8 +24,7 @@ function SpeakerOff() {
 }
 
 /**
- * Background music — plays with sound on open (desktop) or on
- * "Tap to enter" (phones). play() runs synchronously inside the tap handler.
+ * Background music — starts with sound when the guest taps "Tap to enter".
  */
 export default function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -43,7 +37,7 @@ export default function MusicToggle() {
     setAudible(!audio.paused && !audio.muted && audio.volume > 0);
   }, []);
 
-  /** Call inside a user-gesture handler — play() must start synchronously. */
+  /** Runs synchronously inside the preloader tap handler. */
   const unlock = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -71,11 +65,6 @@ export default function MusicToggle() {
     }
   }, [syncState]);
 
-  const tryAutoplay = useCallback(() => {
-    if (prefersTouch()) return;
-    unlock();
-  }, [unlock]);
-
   useEffect(() => {
     if (!config.audioSrc) {
       setShowButton(false);
@@ -86,34 +75,17 @@ export default function MusicToggle() {
     if (!audio) return;
 
     const onError = () => setShowButton(false);
-    const onReady = () => tryAutoplay();
 
     audio.addEventListener("error", onError);
-    audio.addEventListener("canplay", onReady);
     audio.load();
-
     setAudioUnlock(unlock);
-    tryAutoplay();
-
-    const retry = window.setInterval(() => {
-      if (prefersTouch()) return;
-      if (!audio.paused && !audio.muted) {
-        window.clearInterval(retry);
-        return;
-      }
-      tryAutoplay();
-    }, 600);
-    const stopRetry = window.setTimeout(() => window.clearInterval(retry), 10000);
 
     return () => {
       audio.removeEventListener("error", onError);
-      audio.removeEventListener("canplay", onReady);
-      window.clearInterval(retry);
-      window.clearTimeout(stopRetry);
       setAudioUnlock(() => {});
       audio.pause();
     };
-  }, [tryAutoplay, unlock]);
+  }, [unlock]);
 
   const toggle = () => {
     const audio = audioRef.current;
