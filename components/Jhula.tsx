@@ -238,18 +238,43 @@ export default function Jhula() {
           )}
         </AnimatePresence>
 
-        <Reveal className="mt-14 text-center">
-          <p lang="hi" className="font-deva text-2xl text-goldleaf">
-            {config.devanagari.jhula.text}
+        <Reveal className="mt-14 max-w-2xl text-center">
+          <p
+            lang="gu"
+            className="font-guj text-xl font-semibold leading-relaxed text-goldleaf sm:text-2xl"
+          >
+            {config.jhulaMessage.opening}
           </p>
-          <p className="eyebrow mt-2 !text-moonlight/60">
-            {config.devanagari.jhula.translation}
-          </p>
-        </Reveal>
 
-        <Reveal order={1} className="mt-8 text-center">
-          <p className="font-display text-2xl italic leading-relaxed text-moonlight sm:text-3xl">
-            A new jhula will soon swing in our aangan.
+          <div
+            className="mx-auto my-7 flex items-center justify-center gap-3"
+            aria-hidden="true"
+          >
+            <span className="h-px w-10 bg-gold/40 sm:w-14" />
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="rounded-full bg-goldleaf"
+                style={{ width: i === 1 ? 7 : 5, height: i === 1 ? 7 : 5, opacity: i === 1 ? 1 : 0.55 }}
+              />
+            ))}
+            <span className="h-px w-10 bg-gold/40 sm:w-14" />
+          </div>
+
+          <div
+            lang="gu"
+            className="font-guj space-y-2 text-base leading-loose text-moonlight/88 sm:text-lg sm:leading-loose"
+          >
+            {config.jhulaMessage.bodyLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+
+          <p
+            lang="gu"
+            className="mt-8 font-guj text-2xl font-bold tracking-wide text-goldleaf sm:text-3xl"
+          >
+            {config.jhulaMessage.closing}
           </p>
         </Reveal>
       </div>

@@ -3,6 +3,7 @@ import {
   Playfair_Display,
   Tiro_Devanagari_Hindi,
   Yatra_One,
+  Noto_Serif_Gujarati,
   Jost,
 } from "next/font/google";
 import { config } from "@/config";
@@ -35,6 +36,13 @@ const body = Jost({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const gujarati = Noto_Serif_Gujarati({
+  subsets: ["gujarati"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-gujarati",
   display: "swap",
 });
 
@@ -76,7 +84,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${devanagari.variable} ${devaDisplay.variable} ${body.variable}`}>
+    <html lang="en" className={`${display.variable} ${devanagari.variable} ${devaDisplay.variable} ${gujarati.variable} ${body.variable}`}>
       <body className="font-body">
         <div aria-hidden="true" className="kinari kinari-left" />
         <div aria-hidden="true" className="kinari kinari-right" />

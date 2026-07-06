@@ -22,6 +22,7 @@ const config: Config = {
         display: ["var(--font-display)", "Georgia", "serif"],
         deva: ["var(--font-devanagari)", "serif"],
         "deva-display": ["var(--font-deva-display)", "serif"],
+        guj: ["var(--font-gujarati)", "serif"],
         body: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       letterSpacing: {

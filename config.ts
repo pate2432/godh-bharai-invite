@@ -32,10 +32,16 @@ export interface InviteConfig {
   /** Devanagari accent lines with translations (per section) */
   devanagari: {
     hero: { text: string; translation: string };
-    jhula: { text: string; translation: string };
     details: { text: string; translation: string };
     rsvp: { text: string; translation: string };
     footer: { text: string; translation: string };
+  };
+
+  /** Gujarati blessing beneath the jhula */
+  jhulaMessage: {
+    opening: string;
+    bodyLines: string[];
+    closing: string;
   };
 
   /** Hero sub-line below the Devanagari greeting */
@@ -88,11 +94,7 @@ export const config: InviteConfig = {
     "Your presence is the only gift we wish for — your blessings, the only registry.",
 
   devanagari: {
-    hero: { text: "राधे राधे", translation: "Radhe Radhe" },
-    jhula: {
-      text: "नन्द के आनंद भयो",
-      translation: "Joy has come to the house of Nanda",
-    },
+    hero: { text: "જય સ્વામિનારાયણ", translation: "Radhe Krishna" },
     details: { text: "जय श्री कृष्ण", translation: "Jai Shri Krishna" },
     rsvp: {
       text: "आशीर्वाद दीजिये",
@@ -107,6 +109,15 @@ export const config: InviteConfig = {
   heroTagline: "A little Radha/Krishna is on the way",
   rsvpSuccessTo: "Naitik & Krupa",
 
+  jhulaMessage: {
+    opening: "દાંપત્ય જીવનની સૌથી સુંદર અને સમૃદ્ધ ઘડી એટલે માતૃત્વ.",
+    bodyLines: [
+      "પ્રથમ માતૃત્વની ગૌરવવંતી અને મંગલમય પળને",
+      "પરિવારજનોના પ્રેમ, વડીલોના આશીર્વાદ અને સ્વજનોની શુભેચ્છાઓથી ઉજવવાનો પવિત્ર પ્રસંગ એટલે—",
+    ],
+    closing: "સીમંત સંસ્કાર.",
+  },
+
   audioSrc: "/music.mp3",
 
   siteUrl: "https://godh-bharai-invite.netlify.app",
@@ -120,7 +131,7 @@ export const config: InviteConfig = {
     lines: [
       "We are so thrilled to welcome you as we celebrate the upcoming arrival of our little Radha/Krishna.",
       "Your love, laughter, and blessings mean the world to us on this beautiful journey.",
-      "We cannot wait to share this special day with you — surrounded by the people we cherish most.",
+      "We cannot wait to share this special day with you surrounded by the people we cherish most.",
       "Thank you for being part of our story.",
     ],
     signature: "With love, Naitik & Krupa",
