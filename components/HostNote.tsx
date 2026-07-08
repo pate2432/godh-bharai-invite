@@ -43,6 +43,7 @@ export default function HostNote() {
                       src={hostNote.photoSrc}
                       alt={hostNote.photoAlt}
                       fill
+                      unoptimized
                       sizes="(max-width: 768px) 240px, 340px"
                       className="object-cover object-center"
                       priority

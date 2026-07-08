@@ -24,7 +24,8 @@ function SpeakerOff() {
 }
 
 /**
- * Background music — starts with sound when the guest taps "Tap to enter".
+ * Background music — starts on "Tap to enter".
+ * Synchronous muted→unmute play keeps Android/iOS gesture context.
  */
 export default function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -37,28 +38,24 @@ export default function MusicToggle() {
     setAudible(!audio.paused && !audio.muted && audio.volume > 0);
   }, []);
 
-  /** Runs synchronously inside the preloader tap handler. */
   const unlock = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.muted = false;
     audio.volume = 1;
 
-    const attempt = audio.play();
-    if (attempt) {
-      attempt
+    // Pattern that works on Android Chrome + iOS Safari inside a tap handler
+    audio.muted = true;
+    const started = audio.play();
+    audio.muted = false;
+    void audio.play();
+
+    if (started) {
+      started
         .then(() => syncState())
         .catch(() => {
-          audio.muted = true;
-          audio
-            .play()
-            .then(() => {
-              audio.muted = false;
-              return audio.play();
-            })
-            .then(() => syncState())
-            .catch(() => syncState());
+          audio.muted = false;
+          void audio.play()?.then(() => syncState()).catch(() => syncState());
         });
     } else {
       syncState();
@@ -77,6 +74,7 @@ export default function MusicToggle() {
     const onError = () => setShowButton(false);
 
     audio.addEventListener("error", onError);
+    audio.preload = "auto";
     audio.load();
     setAudioUnlock(unlock);
 
@@ -84,6 +82,7 @@ export default function MusicToggle() {
       audio.removeEventListener("error", onError);
       setAudioUnlock(() => {});
       audio.pause();
+      audio.currentTime = 0;
     };
   }, [unlock]);
 

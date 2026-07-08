@@ -91,7 +91,7 @@ export const config: InviteConfig = {
   mapUrl:
     "https://www.google.com/maps/search/?api=1&query=Royal+Indian+Banquets,+31+Melanie+Dr,+Brampton,+ON+L6T+5H8",
 
-  dressCode: "Shades of blue & pink (only if possible and available)",
+  dressCode: "Traditional",
   registryNote:
     "We would be honoured by your presence and your blessings on this beautiful day.",
 
@@ -99,7 +99,7 @@ export const config: InviteConfig = {
     hero: { text: "જય સ્વામિનારાયણ", translation: "Radhe Krishna" },
     details: { text: "જય સ્વામિનારાયણ", translation: "Jai Swaminarayan" },
     rsvp: {
-      text: "आशीर्वाद दीजिये",
+      text: "ૐ",
       translation: "Bestow your blessings",
     },
   },
@@ -128,7 +128,7 @@ export const config: InviteConfig = {
   footerCredit: "awaiting our little Radha/Krishna",
 
   hostNote: {
-    photoSrc: "/host.jpg?v=2",
+    photoSrc: "/host.jpg?v=4",
     photoAlt: "Naitik and Krupa",
     heading: "A note from us",
     lines: [
